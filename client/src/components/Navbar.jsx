@@ -1,4 +1,5 @@
 import { Search, Bell, User } from 'lucide-react';
+import { usePermission } from '../context/PermissionContext';
 
 const Navbar = () => {
   return (
@@ -18,8 +19,23 @@ const Navbar = () => {
         </button>
         <div className="flex items-center gap-3 pl-6 border-l border-gray-200 cursor-pointer">
           <div className="text-right">
-            <p className="text-sm font-semibold text-gray-900">System Admin</p>
-            <p className="text-xs text-gray-500">Superadmin</p>
+{(() => {
+  const { user, isAdmin } = usePermission();
+  if (isAdmin) {
+    return (
+      <>
+        <p className="text-sm font-semibold text-gray-900">System Admin</p>
+        <p className="text-xs text-gray-500">Superadmin</p>
+      </>
+    );
+  }
+  return (
+    <>
+      <p className="text-sm font-semibold text-gray-900">{user?.full_name}</p>
+      <p className="text-xs text-gray-500">{user?.role_name || 'Employee'}</p>
+    </>
+  );
+})()}
           </div>
           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white shadow-md">
             <User className="w-5 h-5" />

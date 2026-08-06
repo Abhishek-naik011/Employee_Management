@@ -47,13 +47,21 @@ const Departments = () => {
     };
 
     fetchDepartments();
+
+    // Listen for chatbot updates
+    const handleChatbotUpdate = (e) => {
+      fetchDepartments();
+    };
+    window.addEventListener('chatbot_action_success', handleChatbotUpdate);
+    
+    return () => window.removeEventListener('chatbot_action_success', handleChatbotUpdate);
   }, []);
 
   const filtered = useMemo(() => {
     return departments.filter(d =>
-      d.department_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      d.department_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      d.department_head.toLowerCase().includes(searchTerm.toLowerCase())
+      d.department_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.department_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.head_name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [departments, searchTerm]);
 
@@ -241,7 +249,7 @@ const Departments = () => {
                       <p className="text-sm text-indigo-600 font-medium">{dept.department_code}</p>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700 hidden md:table-cell">
-                      {dept.department_head}
+                      {dept.head_name || 'Not Assigned'}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 hidden lg:table-cell max-w-xs truncate">
                       {dept.description}
@@ -342,7 +350,7 @@ const EditDeptModal = ({ dept, onClose, onSave }) => {
     defaultValues: {
       name: dept?.department_name || '',
       code: dept?.department_code || '',
-      head: dept?.department_head || '',
+      head: dept?.head_name || '',
       description: dept?.description || '',
     }
   });

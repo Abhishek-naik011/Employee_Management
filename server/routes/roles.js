@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { verifyToken, requireAdmin, requirePermission } = require('../middleware/authMiddleware');
-const { getRoles, createRole, updateRole, deleteRole } = require('../controllers/roleController');
+const { getRoles, createRole, updateRole, deleteRole, getAvailablePermissions } = require('../controllers/roleController');
+
+router.get('/available-permissions', verifyToken, getAvailablePermissions);
 
 // GET all roles — requires login; any authenticated user can list roles (needed for dropdowns)
 // POST / PUT / DELETE — Admin only

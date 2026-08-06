@@ -14,26 +14,43 @@ export const PermissionProvider = ({ children }) => {
 
   const loadUser = async () => {
     try {
+      console.log("========== Loading User ==========");
+
       const res = await authFetch('/api/auth/me');
+
+      console.log("Status:", res.status);
+
       const data = await res.json();
+
+      console.log("Response:", data);
+
       if (data.success) {
         const perms = Array.isArray(data.user.permissions)
           ? data.user.permissions
           : typeof data.user.permissions === 'string'
             ? JSON.parse(data.user.permissions || '[]')
             : [];
+
         setUser(data.user);
         setPermissions(perms);
+
+        console.log("✅ User Loaded:", data.user);
+        console.log("Permissions:", perms);
       } else {
+        console.log("❌ API returned success:false");
+
         setUser(null);
         setPermissions([]);
       }
     } catch (e) {
-      console.error('Failed to load user permissions', e);
+      console.error("❌ Failed to load user:", e);
+
       setUser(null);
       setPermissions([]);
     } finally {
       setLoading(false);
+
+      console.log("========== Done Loading ==========");
     }
   };
 
@@ -46,7 +63,11 @@ export const PermissionProvider = ({ children }) => {
   const hasPermission = (requires) => {
     if (isAdmin) return true;
     if (!requires) return true;
-    const reqArray = Array.isArray(requires) ? requires : [requires];
+
+    const reqArray = Array.isArray(requires)
+      ? requires
+      : [requires];
+
     return reqArray.some(p => permissions.includes(p));
   };
 
@@ -56,7 +77,17 @@ export const PermissionProvider = ({ children }) => {
   };
 
   return (
-    <PermissionContext.Provider value={{ user, permissions, loading, hasPermission, isAdmin, canPerformAction, loadUser }}>
+    <PermissionContext.Provider
+      value={{
+        user,
+        permissions,
+        loading,
+        hasPermission,
+        isAdmin,
+        canPerformAction,
+        loadUser
+      }}
+    >
       {children}
     </PermissionContext.Provider>
   );

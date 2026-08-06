@@ -30,6 +30,29 @@ async function runMigrations() {
         `);
         console.log('✅ assignments table ensured.');
 
+        // Ensure chat history tables exist
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS chat_conversations (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES employees(employee_id) ON DELETE CASCADE,
+                title VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log('✅ chat_conversations table ensured.');
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS chat_messages (
+                id SERIAL PRIMARY KEY,
+                conversation_id INTEGER REFERENCES chat_conversations(id) ON DELETE CASCADE,
+                sender VARCHAR(50) NOT NULL,
+                message TEXT NOT NULL,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log('✅ chat_messages table ensured.');
+
         // Seed roles if table is empty
         const rolesCount = await pool.query('SELECT COUNT(*) FROM roles;');
         if (parseInt(rolesCount.rows[0].count) === 0) {

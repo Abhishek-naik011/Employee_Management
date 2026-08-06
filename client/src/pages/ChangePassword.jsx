@@ -29,6 +29,7 @@ const ChangePassword = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('tempToken')}`
         },
+        credentials: 'include',
         body: JSON.stringify({
           currentPassword: data.currentPassword,
           newPassword: data.newPassword

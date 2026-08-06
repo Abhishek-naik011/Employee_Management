@@ -46,7 +46,7 @@ exports.getEmployees = async (req, res) => {
                 ON e.role_id = r.role_id
             LEFT JOIN employee_auth_accounts a
                 ON e.employee_id = a.employee_id
-            ORDER BY e.employee_id;
+            ORDER BY e.employee_id DESC;
         `;
 
         const result = await pool.query(query);

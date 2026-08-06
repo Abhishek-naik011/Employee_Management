@@ -11,17 +11,21 @@ exports.getDepartments = async (req, res) => {
                 d.department_name,
                 d.department_code,
                 d.department_head,
+                m.full_name AS head_name,
                 d.description,
                 d.created_at,
                 COUNT(e.employee_id) AS count
             FROM departments d
             LEFT JOIN employees e
                 ON d.department_id = e.department_id
+            LEFT JOIN employees m
+                ON d.department_head = CAST(m.employee_id AS VARCHAR)
             GROUP BY
                 d.department_id,
                 d.department_name,
                 d.department_code,
                 d.department_head,
+                m.full_name,
                 d.description,
                 d.created_at
             ORDER BY d.department_id;

@@ -10,17 +10,12 @@ import PermissionGate from '../components/PermissionGate';
 
 const API = 'http://localhost:5000/api';
 
-// ─── Default Permissions Catalogue ────────────────────────────────────────
-const ALL_PERMISSIONS = [
-  'View Employees', 'View Departments',
-  'View Projects', 'View Assigned Projects',
-  'View Reports', 'Assign Employees',
-];
+
 
 // ─── Permission Checkbox Grid ─────────────────────────────────────────────
-const PermissionsGrid = ({ selected, onChange }) => (
+const PermissionsGrid = ({ selected, onChange, availablePermissions = [] }) => (
   <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
-    {ALL_PERMISSIONS.map(perm => {
+    {availablePermissions.map(perm => {
       const checked = selected.includes(perm);
       return (
         <button
@@ -87,7 +82,7 @@ const ViewModal = ({ role, onClose }) => {
 };
 
 // ─── Add Role Modal ───────────────────────────────────────────────────────
-const AddModal = ({ onClose, onSave }) => {
+const AddModal = ({ onClose, onSave, availablePermissions }) => {
   const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: { status: 'Active' } });
   const [selectedPerms, setSelectedPerms] = useState([]);
 
@@ -127,7 +122,7 @@ const AddModal = ({ onClose, onSave }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Permissions <span className="text-gray-400 font-normal">({selectedPerms.length} selected)</span></label>
-              <PermissionsGrid selected={selectedPerms} onChange={setSelectedPerms} />
+              <PermissionsGrid selected={selectedPerms} onChange={setSelectedPerms} availablePermissions={availablePermissions} />
             </div>
           </div>
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
@@ -143,7 +138,7 @@ const AddModal = ({ onClose, onSave }) => {
 };
 
 // ─── Edit Role Modal ──────────────────────────────────────────────────────
-const EditModal = ({ role, onClose, onSave }) => {
+const EditModal = ({ role, onClose, onSave, availablePermissions }) => {
   const perms = role?.permissions ? (Array.isArray(role.permissions) ? role.permissions : JSON.parse(role.permissions || '[]')) : [];
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: { role_name: role?.role_name || '', description: role?.description || '', status: role?.status || 'Active' }
@@ -185,7 +180,7 @@ const EditModal = ({ role, onClose, onSave }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Permissions <span className="text-gray-400 font-normal">({selectedPerms.length} selected)</span></label>
-              <PermissionsGrid selected={selectedPerms} onChange={setSelectedPerms} />
+              <PermissionsGrid selected={selectedPerms} onChange={setSelectedPerms} availablePermissions={availablePermissions} />
             </div>
           </div>
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
@@ -235,6 +230,7 @@ const DeleteDialog = ({ role, onClose, onConfirm }) => {
 // ─── Main Roles Page ──────────────────────────────────────────────────────
 const Roles = () => {
   const [roles, setRoles] = useState([]);
+  const [availablePermissions, setAvailablePermissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -242,6 +238,16 @@ const Roles = () => {
   const [editRole, setEditRole] = useState(null);
   const [deleteRole, setDeleteRole] = useState(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+
+  const loadPermissions = async () => {
+    try {
+      const res = await fetch(`${API}/roles/available-permissions`);
+      const data = await res.json();
+      if (data.success) setAvailablePermissions(data.data);
+    } catch (err) {
+      console.error('Failed to load permissions');
+    }
+  };
 
   const loadRoles = async () => {
     try {
@@ -254,17 +260,26 @@ const Roles = () => {
   };
 
   useEffect(() => {
-    const init = async () => {
+        const init = async () => {
       setIsLoading(true);
-      await loadRoles();
+      await Promise.all([loadRoles(), loadPermissions()]);
       setIsLoading(false);
     };
     init();
+
+    // Listen for chatbot updates
+    const handleChatbotUpdate = (e) => {
+      loadRoles();
+    };
+    window.addEventListener('chatbot_action_success', handleChatbotUpdate);
+    
+    return () => window.removeEventListener('chatbot_action_success', handleChatbotUpdate);
   }, []);
 
   const filtered = useMemo(() =>
     roles.filter(r =>
-      r.role_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.role_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.description?.toLowerCase().includes(searchTerm.toLowerCase())
       (r.description || '').toLowerCase().includes(searchTerm.toLowerCase())
     ), [roles, searchTerm]);
 
@@ -464,8 +479,8 @@ const Roles = () => {
 
       {/* Modals */}
       <ViewModal role={viewRole} onClose={() => setViewRole(null)} />
-      {isAddOpen && <AddModal onClose={() => setIsAddOpen(false)} onSave={handleAdd} />}
-      {editRole && <EditModal role={editRole} onClose={() => setEditRole(null)} onSave={handleEdit} />}
+      {isAddOpen && <AddModal onClose={() => setIsAddOpen(false)} onSave={handleAdd} availablePermissions={availablePermissions} />}
+      {editRole && <EditModal role={editRole} onClose={() => setEditRole(null)} onSave={handleEdit} availablePermissions={availablePermissions} />}
       <DeleteDialog role={deleteRole} onClose={() => setDeleteRole(null)} onConfirm={handleDelete} />
     </div>
   );

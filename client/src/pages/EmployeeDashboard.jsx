@@ -7,6 +7,8 @@ import {
   ChevronRight, X, Users
 } from 'lucide-react';
 import authFetch from '../utils/authFetch';
+import FloatingChatButton from '../components/chatbot/FloatingChatButton';
+import ChatPanel from '../components/chatbot/ChatPanel';
 
 const API = 'http://localhost:5000/api';
 
@@ -45,7 +47,8 @@ const EmployeeDashboard = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await authFetch(`${API}/employees/me`);
+        setIsLoading(true);
+        const res = await authFetch(`/api/employees/me?t=${Date.now()}`);
         const data = await res.json();
         if (data.success) {
           const emp = data.data;
@@ -69,8 +72,15 @@ const EmployeeDashboard = () => {
       }
     };
     fetchProfile();
-  }, []);
 
+    // Listen for chatbot updates
+    const handleChatbotUpdate = (e) => {
+      fetchProfile();
+    };
+    window.addEventListener('chatbot_action_success', handleChatbotUpdate);
+    
+    return () => window.removeEventListener('chatbot_action_success', handleChatbotUpdate);
+  }, []);
   const handleLogout = async () => {
     try {
       await authFetch('/api/auth/logout', { method: 'POST' });
@@ -122,34 +132,10 @@ const EmployeeDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-            <Briefcase className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-bold text-gray-900">EmpManage</span>
-          <span className="text-xs font-medium bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full ml-2">Employee Portal</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-gray-900">{employee.full_name}</p>
-            <p className="text-xs text-gray-500">{employee.role_name || storedUser.role_name || 'Employee'}</p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Logout
-          </button>
-        </div>
-      </header>
-
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <div className="px-4 space-y-6">
 
         {/* Profile Card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="mt-6">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-6">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
@@ -241,53 +227,13 @@ const EmployeeDashboard = () => {
             </div>
           </div>
 
-          {/* Role & Permissions */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-              <Shield className="w-5 h-5 text-blue-600" />
-              <h2 className="text-base font-bold text-gray-900">Role & Permissions</h2>
-            </div>
-            <div className="p-6">
-              <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-5 flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <p className="text-xs text-blue-600 font-medium uppercase tracking-wider">Assigned Role</p>
-                  <p className="text-sm font-bold text-blue-900">{employee.role_name || 'No Role Assigned'}</p>
-                </div>
-              </div>
 
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Permissions</p>
-              {permissions.length > 0 ? (
-                <div className="space-y-2">
-                  {/* Only render cards for permissions the employee's role ACTUALLY has.
-                      This automatically reflects any admin changes on next login/refresh. */}
-                  {permissions.map((perm, i) => {
-                    // Every assigned permission is now dynamically routable
-                    return (
-                      <div
-                        key={i}
-                        onClick={() => handlePermissionClick(perm)}
-                        className="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all bg-white border-emerald-200 hover:border-emerald-300 hover:shadow-sm"
-                      >
-                        <div className="flex items-center gap-3">
-                          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                          <span className="text-sm font-medium text-gray-900">{perm}</span>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-gray-400" />
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <XCircle className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500 italic">No permissions configured for this role</p>
-                </div>
-              )}
-            </div>
-          </div>
+
+
+
+
+
+
 
         </div>
       </div>
@@ -299,6 +245,8 @@ const EmployeeDashboard = () => {
           formatDate={formatDate} 
         />
       )}
+      <FloatingChatButton />
+      <ChatPanel />
     </div>
   );
 };

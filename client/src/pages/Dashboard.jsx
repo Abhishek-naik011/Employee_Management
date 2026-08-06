@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { usePermission } from '../context/PermissionContext';
 import { createPortal } from 'react-dom';
+import authFetch from '../utils/authFetch';
 
 const API = 'http://localhost:5000/api';
 
@@ -278,10 +279,10 @@ const Dashboard = () => {
   const loadData = useCallback(async () => {
     try {
       const [empRes, deptRes, projRes, roleRes] = await Promise.all([
-        fetch(`${API}/employees`),
-        fetch(`${API}/departments`),
-        fetch(`${API}/projects`),
-        fetch(`${API}/roles`),
+        authFetch(`${API}/employees`),
+        authFetch(`${API}/departments`),
+        authFetch(`${API}/projects`),
+        authFetch(`${API}/roles`),
       ]);
 
       const [empData, deptData, projData, roleData] = await Promise.all([
@@ -327,13 +328,23 @@ const Dashboard = () => {
     }
   }, []);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => { 
+    loadData(); 
+
+    const handleChatbotUpdate = (e) => {
+      loadData();
+    };
+    window.addEventListener('chatbot_action_success', handleChatbotUpdate);
+
+    return () => {
+      window.removeEventListener('chatbot_action_success', handleChatbotUpdate);
+    };
+  }, [loadData]);
 
   const handleSaveEdit = useCallback(async (updated) => {
     try {
-      const res = await fetch(`${API}/employees/${updated.employee_id}`, {
+      const res = await authFetch(`${API}/employees/${updated.employee_id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           full_name: updated.full_name,
           email: updated.email,
@@ -361,7 +372,7 @@ const Dashboard = () => {
 
   const handleConfirmDelete = useCallback(async (emp) => {
     try {
-      const res = await fetch(`${API}/employees/${emp.employee_id}`, { method: 'DELETE' });
+      const res = await authFetch(`${API}/employees/${emp.employee_id}`, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
         setDeleteEmployee(null);

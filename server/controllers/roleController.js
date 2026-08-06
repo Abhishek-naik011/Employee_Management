@@ -25,6 +25,24 @@ exports.getRoles = async (req, res) => {
     }
 };
 
+// Get Available Permissions
+exports.getAvailablePermissions = async (req, res) => {
+    try {
+        const permissions = [
+            "View Employees",
+            "View Departments",
+            "View Projects",
+            "View Assigned Projects",
+            "View Reports",
+            "Assign Employees"
+        ];
+        res.status(200).json({ success: true, data: permissions });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // Create Role
 exports.createRole = async (req, res) => {
     try {

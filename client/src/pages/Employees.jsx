@@ -511,15 +511,22 @@ const Employees = () => {
       }
     };
     loadAll();
+
+    // Listen for chatbot updates
+    const handleChatbotUpdate = (e) => {
+      loadEmployees();
+    };
+    window.addEventListener('chatbot_action_success', handleChatbotUpdate);
+    
+    return () => window.removeEventListener('chatbot_action_success', handleChatbotUpdate);
   }, []);
 
   // ── Filtering ──────────────────────────────────────────────────────────────
   const filteredEmployees = useMemo(() => {
     return employees.filter(emp => {
       const id = `EMP${String(emp.employee_id).padStart(3, '0')}`;
-      const matchSearch = emp.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.email.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchSearch = emp.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.email?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchDept = filterDept ? emp.department_name === filterDept : true;
       const matchStatus = filterStatus ? emp.status === filterStatus : true;
       const matchProject = filterProject ? (emp.assigned_projects || []).some(p => p.project_name === filterProject) : true;

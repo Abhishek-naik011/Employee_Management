@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+require('dotenv').config({ override: true });
 const path = require('path');
 
 const cookieParser = require('cookie-parser');
@@ -50,6 +50,7 @@ const employeeRoutes   = require('./routes/employees');
 const projectRoutes    = require('./routes/projects');
 const roleRoutes       = require('./routes/roles');
 const assignmentRoutes = require('./routes/assignments');
+const chatRoutes       = require('./routes/chat');
 const { verifyToken } = require('./middleware/authMiddleware');
 
 // ===============================
@@ -64,6 +65,7 @@ app.use('/api/employees',   verifyToken, employeeRoutes);
 app.use('/api/projects',    verifyToken, projectRoutes);
 app.use('/api/roles',       verifyToken, roleRoutes);
 app.use('/api/assignments', verifyToken, assignmentRoutes);
+app.use('/api/chat',        verifyToken, chatRoutes);
 
 // ===============================
 // 404 Handler

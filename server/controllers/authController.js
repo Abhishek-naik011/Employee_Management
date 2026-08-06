@@ -18,6 +18,9 @@ exports.login = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Please provide email and password' });
         }
 
+        console.log(`\n--- LOGIN DEBUG ---`);
+        console.log(`Email received: ${email}`);
+        
         const query = `
             SELECT
                 e.employee_id,
@@ -36,23 +39,34 @@ exports.login = async (req, res) => {
             WHERE e.email = $1
         `;
         const result = await pool.query(query, [email]);
+        
+        console.log(`User found in database: ${result.rows.length > 0}`);
 
         if (result.rows.length === 0) {
+            console.log(`Response returned: Invalid credentials (no user)`);
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
         const employee = result.rows[0];
 
         if (employee.status !== 'Active') {
+            console.log(`Response returned: Account inactive`);
             return res.status(403).json({ success: false, message: 'Account is inactive. Please contact admin.' });
         }
 
+        console.log(`Password hash from database: ${employee.password_hash}`);
+        console.log(`Password entered: ${password}`);
+
         if (!employee.password_hash) {
+            console.log(`Response returned: Account not fully set up`);
             return res.status(401).json({ success: false, message: 'Account not fully set up. Please contact admin.' });
         }
 
         const isMatch = await bcrypt.compare(password, employee.password_hash);
+        console.log(`bcrypt.compare() result: ${isMatch}`);
+        
         if (!isMatch) {
+            console.log(`Response returned: Invalid credentials (wrong password)`);
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 

@@ -41,12 +41,20 @@ const Projects = () => {
       setIsLoading(false);
     };
     init();
+
+    // Listen for chatbot updates
+    const handleChatbotUpdate = (e) => {
+      loadProjects();
+    };
+    window.addEventListener('chatbot_action_success', handleChatbotUpdate);
+    
+    return () => window.removeEventListener('chatbot_action_success', handleChatbotUpdate);
   }, []);
 
   const filtered = useMemo(() => {
     return projects.filter(p =>
-      (p.project_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.project_code.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (p.project_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.project_code?.toLowerCase().includes(searchTerm.toLowerCase())) &&
       (filterStatus ? p.status === filterStatus : true)
     );
   }, [projects, searchTerm, filterStatus]);
@@ -521,7 +529,8 @@ setSelectedEmployees(assigned);
 
   const filteredEmployees = useMemo(() => {
     return employees.filter(emp => {
-      const matchSearch = emp.full_name.toLowerCase().includes(search.toLowerCase()) ||
+      const matchSearch = emp.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+        emp.email?.toLowerCase().includes(search.toLowerCase());
         String(emp.employee_id).includes(search) ||
         (emp.department_name || '').toLowerCase().includes(search.toLowerCase());
       const matchDept = filterDept ? emp.department_name === filterDept : true;
