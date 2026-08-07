@@ -19,6 +19,8 @@ import Profile from './pages/Profile';
 import Roles from './pages/Roles';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import Register from './pages/Register';
+import AdminAttendance from './pages/AdminAttendance';
+import EmployeeAttendance from './pages/EmployeeAttendance';
 
 const RootRedirect = () => {
   const { user, loading } = usePermission();
@@ -35,6 +37,19 @@ const RootRedirect = () => {
       replace
     />
   );
+};
+
+const AttendanceRouter = () => {
+  const { hasPermission, user } = usePermission();
+  if (!user) return null;
+
+  const canManageReg = hasPermission('Manage Attendance Regularization');
+  
+  if (canManageReg) {
+    return <AdminAttendance />;
+  }
+  
+  return <EmployeeAttendance />;
 };
 
 function App() {
@@ -58,6 +73,7 @@ function App() {
                 <Route element={<DashboardLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/employees" element={<Employees />} />
+                  <Route path="/attendance" element={<AdminAttendance />} />
                   <Route path="/departments" element={<Departments />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/roles" element={<Roles />} />
@@ -135,6 +151,8 @@ function App() {
                       }
                     />
                   </Route>
+                  
+                  <Route path="/portal/attendance" element={<AttendanceRouter />} />
 
                 </Route>
               </Route>

@@ -9,8 +9,26 @@ const app = express();
 const { runMigrations } = require('./migrate');
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174'
+];
+
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    // In development, allow any localhost origin (any port) for flexibility
+    if (origin.startsWith('http://localhost')) {
+      return callback(null, true);
+    }
+    // Otherwise, check against the explicit whitelist
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    // Not allowed
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -51,6 +69,7 @@ const projectRoutes    = require('./routes/projects');
 const roleRoutes       = require('./routes/roles');
 const assignmentRoutes = require('./routes/assignments');
 const chatRoutes       = require('./routes/chat');
+const attendanceRoutes = require('./routes/attendance');
 const { verifyToken } = require('./middleware/authMiddleware');
 
 // ===============================
@@ -66,6 +85,8 @@ app.use('/api/projects',    verifyToken, projectRoutes);
 app.use('/api/roles',       verifyToken, roleRoutes);
 app.use('/api/assignments', verifyToken, assignmentRoutes);
 app.use('/api/chat',        verifyToken, chatRoutes);
+app.use('/api/attendance',  verifyToken, attendanceRoutes);
+app.use('/api/reports',     verifyToken, require('./routes/report'));
 
 // ===============================
 // 404 Handler

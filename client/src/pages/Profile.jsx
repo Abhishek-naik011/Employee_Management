@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import PermissionGate from '../components/PermissionGate';
 import authFetch from '../utils/authFetch';
 import { usePermission } from '../context/PermissionContext';
+import PrimaryButton from '../components/common/PrimaryButton';
 
 const API = 'http://localhost:5000/api';
 
@@ -169,9 +170,9 @@ const Profile = () => {
                   </div>
                 </div>
                 <div className="pt-4 flex justify-end">
-                  <button type="submit" className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium shadow-sm transition-all">
-                    <Save className="w-4 h-4" /> Save Changes
-                  </button>
+                  <PrimaryButton type="submit" icon={<Save className="w-4 h-4" />}>
+                    Save Changes
+                  </PrimaryButton>
                 </div>
               </form>
             </div>

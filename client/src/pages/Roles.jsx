@@ -7,6 +7,8 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { usePermission } from '../context/PermissionContext';
 import PermissionGate from '../components/PermissionGate';
+import PrimaryButton from '../components/common/PrimaryButton';
+import SecondaryButton from '../components/common/SecondaryButton';
 
 const API = 'http://localhost:5000/api';
 
@@ -126,10 +128,10 @@ const AddModal = ({ onClose, onSave, availablePermissions }) => {
             </div>
           </div>
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
-            <button type="button" onClick={onClose} className="px-5 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-xl transition-colors">Cancel</button>
-            <button type="submit" className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-xl shadow-sm transition-colors">
-              <Save className="w-4 h-4" /> Save Role
-            </button>
+            <SecondaryButton type="button" onClick={onClose}>Cancel</SecondaryButton>
+            <PrimaryButton type="submit" icon={<Save className="w-4 h-4" />}>
+              Save Role
+            </PrimaryButton>
           </div>
         </form>
       </div>
@@ -184,10 +186,10 @@ const EditModal = ({ role, onClose, onSave, availablePermissions }) => {
             </div>
           </div>
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
-            <button type="button" onClick={onClose} className="px-5 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-xl transition-colors">Cancel</button>
-            <button type="submit" className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-xl shadow-sm transition-colors">
-              <Save className="w-4 h-4" /> Save Changes
-            </button>
+            <SecondaryButton type="button" onClick={onClose}>Cancel</SecondaryButton>
+            <PrimaryButton type="submit" icon={<Save className="w-4 h-4" />}>
+              Save Changes
+            </PrimaryButton>
           </div>
         </form>
       </div>
@@ -213,9 +215,9 @@ const DeleteDialog = ({ role, onClose, onConfirm }) => {
           }
         </p>
         <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 rounded-xl transition-colors">
+          <SecondaryButton onClick={onClose} className="flex-1 py-3 hover:bg-gray-100">
             {isAdmin ? 'Close' : 'Cancel'}
-          </button>
+          </SecondaryButton>
           {!isAdmin && (
             <button onClick={() => onConfirm(role)} className="flex-1 px-4 py-3 bg-red-600 text-white font-medium hover:bg-red-700 rounded-xl shadow-sm transition-colors">
               Delete
@@ -362,13 +364,13 @@ const Roles = () => {
           </p>
         </div>
         <PermissionGate requires="Manage Roles">
-          <button
+          <PrimaryButton
             onClick={() => setIsAddOpen(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm shadow-blue-200 transition-all active:scale-[0.98]"
+            icon={<Plus className="w-5 h-5" />}
+            className="shadow-blue-200 active:scale-[0.98]"
           >
-            <Plus className="w-5 h-5" />
             <span>Add Role</span>
-          </button>
+          </PrimaryButton>
         </PermissionGate>
       </div>
 

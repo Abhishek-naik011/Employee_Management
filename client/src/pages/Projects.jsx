@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 import authFetch from '../utils/authFetch';
 import { usePermission } from '../context/PermissionContext';
 import PermissionGate from '../components/PermissionGate';
+import PrimaryButton from '../components/common/PrimaryButton';
+import SecondaryButton from '../components/common/SecondaryButton';
 
 const API = 'http://localhost:5000/api';
 
@@ -143,13 +145,12 @@ const Projects = () => {
           </p>
         </div>
         <PermissionGate requires="Manage Projects">
-          <button 
+          <PrimaryButton
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm transition-all"
+            icon={<Plus className="w-5 h-5" />}
           >
-            <Plus className="w-5 h-5" />
             <span>Add Project</span>
-          </button>
+          </PrimaryButton>
         </PermissionGate>
       </div>
 
@@ -272,8 +273,8 @@ const Projects = () => {
             <h3 className="text-xl font-bold mb-2">Delete Project</h3>
             <p className="text-gray-500 mb-6">Are you sure you want to delete {projectToDelete?.project_name}?</p>
             <div className="flex gap-3">
-              <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-3 bg-gray-100 rounded-xl">Cancel</button>
-              <button onClick={handleDeleteConfirm} className="flex-1 py-3 bg-red-600 text-white rounded-xl">Delete</button>
+              <SecondaryButton onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200">Cancel</SecondaryButton>
+              <button onClick={handleDeleteConfirm} className="flex-1 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors">Delete</button>
             </div>
           </div>
         </div>
@@ -342,8 +343,8 @@ const AddProjectModal = ({ onClose, onSave }) => {
           </form>
         </div>
         <div className="px-6 py-4 border-t flex justify-end gap-3 shrink-0 bg-gray-50/50">
-          <button type="button" onClick={onClose} className="px-5 py-2 hover:bg-gray-100 rounded-xl">Cancel</button>
-          <button form="add-project-form" type="submit" className="px-5 py-2 bg-blue-600 text-white rounded-xl">Save</button>
+          <SecondaryButton type="button" onClick={onClose}>Cancel</SecondaryButton>
+          <PrimaryButton form="add-project-form" type="submit">Save</PrimaryButton>
         </div>
       </div>
     </div>
@@ -481,10 +482,10 @@ const EditProjectModal = ({ project, onClose, onSave }) => {
           </form>
         </div>
         <div className="px-6 py-4 flex justify-end gap-3 border-t bg-gray-50/50 shrink-0 mt-auto">
-          <button type="button" onClick={onClose} className="px-5 py-2 hover:bg-gray-100 rounded-xl">Cancel</button>
-          <button type="submit" form="edit-project-form" className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700">
-            <Save className="w-4 h-4" /> Save Changes
-          </button>
+          <SecondaryButton type="button" onClick={onClose}>Cancel</SecondaryButton>
+          <PrimaryButton type="submit" form="edit-project-form" icon={<Save className="w-4 h-4" />}>
+            Save Changes
+          </PrimaryButton>
         </div>
       </div>
     </div>
@@ -651,14 +652,13 @@ setSelectedEmployees(assigned);
             {selectedEmployees.length} employee(s) selected
           </span>
           <div className="flex gap-3">
-            <button onClick={onClose} className="px-5 py-2 hover:bg-gray-100 rounded-xl font-medium text-gray-700">Cancel</button>
-            <button
+            <SecondaryButton onClick={onClose}>Cancel</SecondaryButton>
+            <PrimaryButton
               onClick={handleAssign}
               disabled={selectedEmployees.length === 0}
-              className="px-5 py-2 bg-blue-600 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors shadow-sm"
             >
               Assign Selected
-            </button>
+            </PrimaryButton>
           </div>
         </div>
       </div>

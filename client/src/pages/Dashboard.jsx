@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { usePermission } from '../context/PermissionContext';
 import { createPortal } from 'react-dom';
 import authFetch from '../utils/authFetch';
+import ExportReportModal from '../components/ExportReportModal';
 
 const API = 'http://localhost:5000/api';
 
@@ -272,6 +273,8 @@ const Dashboard = () => {
   const [viewEmployee, setViewEmployee] = useState(null);
   const [editEmployee, setEditEmployee] = useState(null);
   const [deleteEmployee, setDeleteEmployee] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const [deptList, setDeptList] = useState([]);
   const [roleList, setRoleList] = useState([]);
@@ -395,7 +398,7 @@ const Dashboard = () => {
           <p className="text-gray-500 mt-1">Welcome back, here's what's happening today.</p>
         </div>
         <button
-          onClick={() => toast.success('Report generation coming soon!')}
+          onClick={() => setShowReportModal(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm shadow-blue-200 transition-all"
         >
           Generate Report
@@ -505,6 +508,11 @@ const Dashboard = () => {
       <ViewModal employee={viewEmployee} onClose={() => setViewEmployee(null)} />
       <EditModal employee={editEmployee} departments={deptList} roles={roleList} onClose={() => setEditEmployee(null)} onSave={handleSaveEdit} />
       <DeleteDialog employee={deleteEmployee} onClose={() => setDeleteEmployee(null)} onConfirm={handleConfirmDelete} />
+      
+      <ExportReportModal 
+        open={showReportModal} 
+        onClose={() => setShowReportModal(false)} 
+      />
     </div>
   );
 };

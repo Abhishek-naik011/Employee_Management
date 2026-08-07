@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 import authFetch from '../utils/authFetch';
 import { usePermission } from '../context/PermissionContext';
 import PermissionGate from '../components/PermissionGate';
+import PrimaryButton from '../components/common/PrimaryButton';
+import SecondaryButton from '../components/common/SecondaryButton';
 
 const DUMMY_DEPARTMENTS = [
   { id: 'DPT01', name: 'Software Development', code: 'IT-DEV', head: 'John Smith', count: 45, description: 'Develops and maintains software applications.' },
@@ -193,13 +195,12 @@ const Departments = () => {
           </p>
         </div>
         <PermissionGate requires="Manage Departments">
-          <button
+          <PrimaryButton
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm transition-all"
+            icon={<Plus className="w-5 h-5" />}
           >
-            <Plus className="w-5 h-5" />
             <span>Add Department</span>
-          </button>
+          </PrimaryButton>
         </PermissionGate>
       </div>
 
@@ -314,8 +315,8 @@ const Departments = () => {
                 <textarea {...register('description', { required: true })} className="w-full px-4 py-2 border rounded-xl"></textarea>
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t">
-                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-5 py-2 hover:bg-gray-100 rounded-xl">Cancel</button>
-                <button type="submit" className="px-5 py-2 bg-blue-600 text-white rounded-xl">Save</button>
+                <SecondaryButton type="button" onClick={() => setIsAddModalOpen(false)}>Cancel</SecondaryButton>
+                <PrimaryButton type="submit">Save</PrimaryButton>
               </div>
             </form>
           </div>
@@ -330,8 +331,8 @@ const Departments = () => {
             <h3 className="text-xl font-bold mb-2">Delete Department</h3>
             <p className="text-gray-500 mb-6">Are you sure you want to delete {deptToDelete?.department_name}?</p>
             <div className="flex gap-3">
-              <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-3 bg-gray-100 rounded-xl">Cancel</button>
-              <button onClick={handleDeleteConfirm} className="flex-1 py-3 bg-red-600 text-white rounded-xl">Delete</button>
+              <SecondaryButton onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200">Cancel</SecondaryButton>
+              <button onClick={handleDeleteConfirm} className="flex-1 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors">Delete</button>
             </div>
           </div>
         </div>
@@ -379,10 +380,10 @@ const EditDeptModal = ({ dept, onClose, onSave }) => {
             <textarea {...register('description', { required: true })} rows={3} className="w-full px-4 py-2 border border-gray-200 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <button type="button" onClick={onClose} className="px-5 py-2 hover:bg-gray-100 rounded-xl">Cancel</button>
-            <button type="submit" className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700">
-              <Save className="w-4 h-4" /> Save Changes
-            </button>
+            <SecondaryButton type="button" onClick={onClose}>Cancel</SecondaryButton>
+            <PrimaryButton type="submit" icon={<Save className="w-4 h-4" />}>
+              Save Changes
+            </PrimaryButton>
           </div>
         </form>
       </div>

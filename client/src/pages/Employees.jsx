@@ -9,6 +9,8 @@ import authFetch from '../utils/authFetch';
 import { generateTemporaryPassword } from '../utils/password';
 import { usePermission } from '../context/PermissionContext';
 import PermissionGate from '../components/PermissionGate';
+import PrimaryButton from '../components/common/PrimaryButton';
+import SecondaryButton from '../components/common/SecondaryButton';
 
 const API = 'http://localhost:5000/api';
 const MASKED_PASSWORD = '************';
@@ -79,14 +81,14 @@ const ViewModal = ({
                   >
                     Copy Password
                   </button>
-                  <button
+                  <PrimaryButton
                     type="button"
                     onClick={() => onPasswordAction(employee)}
                     disabled={isPasswordActionLoading}
-                    className="px-4 py-2.5 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-200 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="shadow-blue-200"
                   >
                     {isPasswordActionLoading ? 'Working...' : (hasPassword ? 'Reset Password' : 'Generate Password')}
-                  </button>
+                  </PrimaryButton>
                 </div>
               </div>
               <div className="mt-3">
@@ -150,21 +152,11 @@ const PasswordResetConfirmDialog = ({ employee, onCancel, onConfirm }) => {
           <p className="text-sm text-gray-600 leading-relaxed">
             This will invalidate the current temporary password. The employee will need to use the newly generated password.
           </p>
-          <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-5 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => onConfirm(employee)}
-              className="px-5 py-2.5 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-200 transition-colors"
-            >
+          <div className="flex gap-3 justify-end">
+            <SecondaryButton type="button" onClick={onCancel}>Cancel</SecondaryButton>
+            <PrimaryButton type="button" onClick={() => onConfirm(employee)} className="shadow-blue-200">
               Generate New Password
-            </button>
+            </PrimaryButton>
           </div>
         </div>
       </div>
@@ -251,12 +243,10 @@ const EditModal = ({ employee, departments, roles, onClose, onSave }) => {
             </div>
           </div>
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
-            <button type="button" onClick={onClose} className="px-5 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-xl transition-colors">
-              Cancel
-            </button>
-            <button type="submit" className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-200 transition-colors">
-              <Save className="w-4 h-4" /> Save Changes
-            </button>
+            <SecondaryButton type="button" onClick={onClose}>Cancel</SecondaryButton>
+            <PrimaryButton type="submit" icon={<Save className="w-4 h-4" />} className="shadow-blue-200">
+              Save Changes
+            </PrimaryButton>
           </div>
         </form>
       </div>
@@ -318,12 +308,10 @@ const SalaryModal = ({ employee, onClose, onSave }) => {
             </div>
           </div>
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-            <button type="button" onClick={onClose} className="px-5 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-xl transition-colors">
-              Cancel
-            </button>
-            <button type="submit" className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-200 transition-colors">
-              <Save className="w-4 h-4" /> Save Changes
-            </button>
+            <SecondaryButton type="button" onClick={onClose}>Cancel</SecondaryButton>
+            <PrimaryButton type="submit" icon={<Save className="w-4 h-4" />} className="shadow-blue-200">
+              Save Changes
+            </PrimaryButton>
           </div>
         </form>
       </div>
@@ -355,20 +343,8 @@ const PasswordDialog = ({ title, temporaryPassword, onCopy, onClose }) => {
             />
           </div>
           <div className="flex gap-3 justify-end pt-2 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={onCopy}
-              className="px-5 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              Copy Password
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2.5 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-200 transition-colors"
-            >
-              Close
-            </button>
+            <SecondaryButton type="button" onClick={onCopy}>Copy Password</SecondaryButton>
+            <PrimaryButton type="button" onClick={onClose} className="shadow-blue-200">Close</PrimaryButton>
           </div>
         </div>
       </div>
@@ -754,16 +730,16 @@ const Employees = () => {
           </p>
         </div>
         {canManageEmployees && (
-          <button
+          <PrimaryButton
             onClick={() => {
               setTemporaryPassword('');
               setIsAddModalOpen(true);
             }}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm shadow-blue-200 transition-all active:scale-[0.98]"
+            icon={<Plus className="w-5 h-5" />}
+            className="shadow-blue-200 active:scale-[0.98]"
           >
-            <Plus className="w-5 h-5" />
             <span>Add Employee</span>
-          </button>
+          </PrimaryButton>
         )}
       </div>
 
@@ -986,13 +962,13 @@ const Employees = () => {
                       placeholder="Click Generate Password"
                       className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none cursor-not-allowed font-mono text-gray-900"
                     />
-                    <button
+                    <PrimaryButton
                       type="button"
                       onClick={handleGenerateTemporaryPassword}
-                      className="px-5 py-2.5 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-200 transition-colors whitespace-nowrap"
+                      className="shadow-blue-200 whitespace-nowrap"
                     >
                       Generate Password
-                    </button>
+                    </PrimaryButton>
                   </div>
                 </div>
                 <div>
@@ -1030,12 +1006,10 @@ const Employees = () => {
                 </div>
               </div>
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onClick={() => { setIsAddModalOpen(false); reset(); setTemporaryPassword(''); }} className="px-5 py-2.5 text-gray-700 font-medium hover:bg-gray-100 rounded-xl transition-colors">
+                <SecondaryButton type="button" onClick={() => { setIsAddModalOpen(false); reset(); setTemporaryPassword(''); }}>
                   Cancel
-                </button>
-                <button type="submit" className="px-5 py-2.5 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-xl shadow-sm shadow-blue-200 transition-colors">
-                  Save Employee
-                </button>
+                </SecondaryButton>
+                <PrimaryButton type="submit" className="shadow-blue-200">Save Employee</PrimaryButton>
               </div>
             </form>
           </div>
@@ -1054,12 +1028,12 @@ const Employees = () => {
               Are you sure you want to delete <span className="font-bold text-gray-900">{employeeToDelete?.full_name}</span>? This action cannot be undone.
             </p>
             <div className="flex gap-3 w-full">
-              <button
+              <SecondaryButton
                 onClick={() => { setIsDeleteModalOpen(false); setEmployeeToDelete(null); }}
-                className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 rounded-xl transition-colors"
+                className="flex-1 py-3 bg-gray-100 hover:bg-gray-200"
               >
                 Cancel
-              </button>
+              </SecondaryButton>
               <button
                 onClick={handleDeleteConfirm}
                 className="flex-1 px-4 py-3 bg-red-600 text-white font-medium hover:bg-red-700 rounded-xl shadow-sm shadow-red-200 transition-colors"

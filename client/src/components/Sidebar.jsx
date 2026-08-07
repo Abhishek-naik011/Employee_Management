@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Building2, FolderKanban, ShieldCheck, UserCircle, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Building2, FolderKanban, ShieldCheck, UserCircle, LogOut, Clock } from 'lucide-react';
 import authFetch from '../utils/authFetch';
 
 const Sidebar = () => {
@@ -9,6 +9,7 @@ const Sidebar = () => {
     { name: 'Employees', icon: Users, path: '/employees' },
     { name: 'Departments', icon: Building2, path: '/departments' },
     { name: 'Projects', icon: FolderKanban, path: '/projects' },
+    { name: 'Attendance', icon: Clock, path: '/attendance' },
     { name: 'Roles', icon: ShieldCheck, path: '/roles' },
     { name: 'Profile', icon: UserCircle, path: '/profile' },
   ];

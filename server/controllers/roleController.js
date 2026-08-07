@@ -34,7 +34,8 @@ exports.getAvailablePermissions = async (req, res) => {
             "View Projects",
             "View Assigned Projects",
             "View Reports",
-            "Assign Employees"
+            "Assign Employees",
+            "Manage Attendance Regularization"
         ];
         res.status(200).json({ success: true, data: permissions });
     } catch (error) {

@@ -167,7 +167,11 @@ const ChatInput = () => {
           });
           addMessage(data.impact_analysis + "\n\nAre you sure you want to delete this?", 'assistant');
         } else if (data.action === 'GET') {
-          addMessage(`✅ Successfully retrieved data.`, 'assistant', data.data, data.module);
+          if (data.module === 'attendance') {
+            addMessage(data.message, 'assistant');
+          } else {
+            addMessage(`✅ Successfully retrieved data.`, 'assistant', data.data, data.module);
+          }
         } else {
           try {
             window.dispatchEvent(new CustomEvent('chatbot_action_success', {

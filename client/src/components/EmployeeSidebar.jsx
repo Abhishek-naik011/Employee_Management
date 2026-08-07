@@ -8,6 +8,7 @@ import {
   BarChart2,
   UserCircle,
   LogOut,
+  CalendarDays,
 } from 'lucide-react';
 import authFetch from '../utils/authFetch';
 import { usePermission } from '../context/PermissionContext';
@@ -21,6 +22,7 @@ const EmployeeSidebar = () => {
     { name: 'Employees', icon: Users, path: '/portal/employees', requires: 'View Employees' },
     { name: 'Departments', icon: Building2, path: '/portal/departments', requires: 'View Departments' },
     { name: 'Projects', icon: FolderKanban, path: '/portal/projects', requires: 'View Projects' },
+    { name: 'Attendance', icon: CalendarDays, path: '/portal/attendance', requires: null },
     { name: 'Roles', icon: ShieldCheck, path: '/portal/roles', requires: 'View Roles' },
     { name: 'Reports', icon: BarChart2, path: '/portal/reports', requires: 'View Reports' },
     { name: 'Profile', icon: UserCircle, path: '/portal/profile', requires: null },

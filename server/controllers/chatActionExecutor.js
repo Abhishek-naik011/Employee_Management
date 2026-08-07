@@ -61,6 +61,7 @@ const getProjectIdByName = async (client, nameOrId) => {
 exports.executeAction = async (req, res) => {
     const { intent, parameters } = req.body;
     const client = await pool.connect();
+    let customMessage = null;
 
     try {
         await client.query('BEGIN');
@@ -822,6 +823,62 @@ VALUES ($1,$2,$3,$4,$5,$6,$7)
             const result = await client.query(query, [req.user?.email || 'admin@example.com']);
             resultData = result.rows;
         }
+        else if (intent === 'QUERY_ATTENDANCE') {
+            operationType = 'GET';
+            moduleName = 'attendance';
+            
+            const attendanceController = require('./attendanceController');
+            let attendanceData = [];
+            const mockReq = { query: { dateFilter: 'Today' } };
+            const mockRes = { status: () => ({ json: (d) => { if(d.success) attendanceData = d.data; } }) };
+            await attendanceController.getAll(mockReq, mockRes);
+            
+            const empRes = await client.query('SELECT employee_id, full_name FROM employees');
+            const allEmployees = empRes.rows;
+
+            let replyMsg = '';
+            
+            const qType = parameters.query_type || (parameters.status ? parameters.status : 'Working');
+
+            if (resolvedEmployeeId) {
+                const targetEmp = allEmployees.find(e => e.employee_id === resolvedEmployeeId);
+                const rec = attendanceData.find(a => a.employee_id === resolvedEmployeeId);
+                
+                if (rec) {
+                    const inStr = new Date(rec.check_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const outStr = rec.check_out_time ? new Date(rec.check_out_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--';
+                    const hrsStr = rec.working_minutes ? `${String(Math.floor(rec.working_minutes/60)).padStart(2, '0')}h ${String(Math.floor(rec.working_minutes%60)).padStart(2, '0')}m` : '--';
+                    const dateStr = new Date(rec.attendance_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                    
+                    if (qType.toLowerCase() === 'check out' && !rec.check_out_time) {
+                        replyMsg = `❌ No.\n\n${targetEmp.full_name} has not checked out yet.\n\nCurrent Status: ${rec.status}`;
+                    } else if (qType.toLowerCase() === 'check out' && rec.check_out_time) {
+                        replyMsg = `✅ Yes.\n\nCheck Out: ${outStr}\nWorking Hours: ${hrsStr}\nStatus: ${rec.status}`;
+                    } else {
+                        replyMsg = `✅ Yes.\n\nEmployee: ${targetEmp.full_name}\nDate: ${dateStr}\nStatus: ${rec.status}\nCheck In: ${inStr}\nCheck Out: ${outStr}\nWorking Time: ${hrsStr}`;
+                    }
+                } else {
+                    replyMsg = `❌ No.\n\nEmployee: ${targetEmp.full_name}\nStatus: Absent\nCheck In: --\nCheck Out: --\nWorking Time: --`;
+                }
+            } else {
+                if (qType.toLowerCase() === 'absent') {
+                    const presentIds = attendanceData.map(a => a.employee_id);
+                    const absentEmps = allEmployees.filter(e => !presentIds.includes(e.employee_id));
+                    replyMsg = `🔴 Absent Today (${absentEmps.length})\n\n` + absentEmps.map(e => `• ${e.full_name}`).join('\n');
+                } else if (qType.toLowerCase() === 'working') {
+                    const filtered = attendanceData.filter(a => a.status === 'Working');
+                    replyMsg = `🟢 Currently Working (${filtered.length})\n\n` + filtered.map(a => `• ${a.full_name}`).join('\n');
+                } else if (qType.toLowerCase() === 'completed') {
+                    const filtered = attendanceData.filter(a => a.status === 'Completed');
+                    replyMsg = `🔵 Completed (${filtered.length})\n\n` + filtered.map(a => `• ${a.full_name}`).join('\n');
+                } else {
+                    replyMsg = `🟢 Present Today (${attendanceData.length})\n\n` + attendanceData.map(a => `• ${a.full_name} (${a.status})`).join('\n');
+                }
+            }
+
+            resultData = [];
+            customMessage = replyMsg;
+        }
         else {
             throw new Error(`Execution for intent ${intent} is not supported directly yet.`);
         }
@@ -836,7 +893,7 @@ VALUES ($1,$2,$3,$4,$5,$6,$7)
             action: operationType,
             data: resultData,
             undoData,
-            message: "Action completed successfully"
+            message: customMessage || "Action completed successfully"
         });
 
     } catch (error) {
