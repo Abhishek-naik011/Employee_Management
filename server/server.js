@@ -10,29 +10,32 @@ const { runMigrations } = require('./migrate');
 
 // Middleware
 const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://employee-management-jobh.vercel.app',
   'http://localhost:5173',
   'http://localhost:5174'
-];
+].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
+    
     // In development, allow any localhost origin (any port) for flexibility
     if (origin.startsWith('http://localhost')) {
       return callback(null, true);
     }
-    // Allow production frontend if specified
-    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
-      return callback(null, true);
-    }
-    // Otherwise, check against the explicit whitelist
+    
+    // Check against the explicit whitelist
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
+    
     // Not allowed
     return callback(new Error('Not allowed by CORS'));
   },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 app.use(express.json());
