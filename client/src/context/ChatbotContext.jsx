@@ -29,7 +29,7 @@ export const ChatbotProvider = ({ children }) => {
 
   const fetchConversations = async () => {
     try {
-      const res = await authFetch(`\${import.meta.env.VITE_API_URL}/chat/history`);
+      const res = await authFetch(`${import.meta.env.VITE_API_URL}/chat/history`);
       if (res.ok) {
         const data = await res.json();
         setConversations(data.data || []);
@@ -41,7 +41,7 @@ export const ChatbotProvider = ({ children }) => {
 
   const loadConversation = async (id) => {
     try {
-      const res = await authFetch(`\${import.meta.env.VITE_API_URL}/chat/history/${id}`);
+      const res = await authFetch(`${import.meta.env.VITE_API_URL}/chat/history/${id}`);
       if (res.ok) {
         const data = await res.json();
         const loadedMessages = data.data.map(msg => {
@@ -110,7 +110,7 @@ export const ChatbotProvider = ({ children }) => {
     }
     if (confirmed) {
       try {
-        const res = await authFetch(`\${import.meta.env.VITE_API_URL}/chat/execute`, {
+        const res = await authFetch(`${import.meta.env.VITE_API_URL}/chat/execute`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ intent: currentIntent, parameters: { id: entityId, confirmed: true } }),
@@ -140,7 +140,7 @@ export const ChatbotProvider = ({ children }) => {
 
   const renameConversation = async (id, newTitle) => {
     try {
-      const res = await authFetch(`\${import.meta.env.VITE_API_URL}/chat/history/${id}`, {
+      const res = await authFetch(`${import.meta.env.VITE_API_URL}/chat/history/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: newTitle })
@@ -155,7 +155,7 @@ export const ChatbotProvider = ({ children }) => {
 
   const deleteConversation = async (id) => {
     try {
-      const res = await authFetch(`\${import.meta.env.VITE_API_URL}/chat/history/${id}`, {
+      const res = await authFetch(`${import.meta.env.VITE_API_URL}/chat/history/${id}`, {
         method: 'DELETE'
       });
       if (res.ok) {
@@ -195,7 +195,7 @@ export const ChatbotProvider = ({ children }) => {
 
       // If it's a new conversation and user is sending a message
       if (!activeId) {
-        const res = await authFetch(`\${import.meta.env.VITE_API_URL}/chat/history`, {
+        const res = await authFetch(`${import.meta.env.VITE_API_URL}/chat/history`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ initialMessage: text })
@@ -213,7 +213,7 @@ export const ChatbotProvider = ({ children }) => {
         const messageBody = { sender, text };
         if (dataPayload !== null) messageBody.dataPayload = dataPayload;
         if (moduleName !== null) messageBody.moduleName = moduleName;
-        await authFetch(`\${import.meta.env.VITE_API_URL}/chat/history/${activeId}/messages`, {
+        await authFetch(`${import.meta.env.VITE_API_URL}/chat/history/${activeId}/messages`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(messageBody)
