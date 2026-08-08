@@ -6,7 +6,7 @@ import authFetch from '../utils/authFetch';
 import { usePermission } from '../context/PermissionContext';
 import PrimaryButton from '../components/common/PrimaryButton';
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL;
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('personal');

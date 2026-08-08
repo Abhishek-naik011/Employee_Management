@@ -5,7 +5,7 @@ import { X, Check, Loader2 } from 'lucide-react';
 import authFetch from '../utils/authFetch';
 import toast from 'react-hot-toast';
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL;
 
 const ADMIN_REPORT_TYPES = [
   'Overall Company Report',

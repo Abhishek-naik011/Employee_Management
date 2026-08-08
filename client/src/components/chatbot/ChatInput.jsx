@@ -7,7 +7,7 @@ import { useGuidedWorkflow } from './useGuidedWorkflow';
 import { workflowConfig } from './workflowConfig';
 import ChatDataViewer from './ChatDataViewer';
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL;
 
 const ChatInput = () => {
   const [text, setText] = useState('');

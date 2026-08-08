@@ -9,7 +9,7 @@ import { createPortal } from 'react-dom';
 import authFetch from '../utils/authFetch';
 import ExportReportModal from '../components/ExportReportModal';
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL;
 
 // ─── Clickable Stat Card ────────────────────────────────────────────────────
 const StatCard = ({ title, value, icon: Icon, color, trend, onClick }) => (

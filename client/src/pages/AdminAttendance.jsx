@@ -4,7 +4,7 @@ import authFetch from '../utils/authFetch';
 import toast from 'react-hot-toast';
 import ExportReportModal from '../components/ExportReportModal';
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL;
 
 const StatCard = ({ title, value, icon: Icon, color, onClick, isActive }) => (
   <div

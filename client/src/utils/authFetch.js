@@ -7,7 +7,7 @@
  *   const data = await authFetch('/api/employees');
  *   const data = await authFetch('/api/employees', { method: 'POST', body: JSON.stringify({...}) });
  */
-const BASE = 'http://localhost:5000';
+const BASE = import.meta.env.VITE_API_URL.replace('/api', '');
 
 const authFetch = async (url, options = {}) => {
   const headers = {

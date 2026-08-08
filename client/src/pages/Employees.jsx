@@ -12,7 +12,7 @@ import PermissionGate from '../components/PermissionGate';
 import PrimaryButton from '../components/common/PrimaryButton';
 import SecondaryButton from '../components/common/SecondaryButton';
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL;
 const MASKED_PASSWORD = '************';
 
 const maskPassword = (value) => (value ? '*'.repeat(Math.max(8, Math.min(value.length, 12))) : MASKED_PASSWORD);

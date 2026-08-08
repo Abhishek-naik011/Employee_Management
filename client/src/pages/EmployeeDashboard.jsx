@@ -12,7 +12,7 @@ import ChatPanel from '../components/chatbot/ChatPanel';
 import ExportReportModal from '../components/ExportReportModal';
 import { formatDate } from '../utils/dateUtils';
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL;
 
 const normalizePermissions = (value) => {
   if (Array.isArray(value)) return value;

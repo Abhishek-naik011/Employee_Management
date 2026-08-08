@@ -10,7 +10,7 @@ import PermissionGate from '../components/PermissionGate';
 import PrimaryButton from '../components/common/PrimaryButton';
 import SecondaryButton from '../components/common/SecondaryButton';
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL;
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);

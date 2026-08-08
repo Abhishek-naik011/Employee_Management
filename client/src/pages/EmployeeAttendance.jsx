@@ -21,7 +21,7 @@ const StatCard = ({ title, value, suffix, icon: Icon, color }) => (
   </div>
 );
 
-const API = 'http://localhost:5000/api';
+const API = import.meta.env.VITE_API_URL;
 
 const EmployeeAttendance = () => {
   const [stats, setStats] = useState({
