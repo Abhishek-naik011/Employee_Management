@@ -22,6 +22,10 @@ app.use(cors({
     if (origin.startsWith('http://localhost')) {
       return callback(null, true);
     }
+    // Allow production frontend if specified
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+      return callback(null, true);
+    }
     // Otherwise, check against the explicit whitelist
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
