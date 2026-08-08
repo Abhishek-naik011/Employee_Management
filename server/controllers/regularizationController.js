@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { calculateAttendanceDuration } = require('../utils/attendanceHelper');
 
 exports.createRequest = async (req, res) => {
   try {
@@ -148,13 +149,15 @@ exports.approveRequest = async (req, res) => {
     const checkIn = inTimeStr ? `${attDateStr} ${inTimeStr}` : null;
     const checkOut = outTimeStr ? `${attDateStr} ${outTimeStr}` : null;
     
-    // Calculate working minutes
+    // Calculate working minutes and get corrected check-out safely
     let workingMinutes = 0;
+    let correctedCheckOut = checkOut;
     let status = 'Absent';
+
     if (checkIn && checkOut) {
-      const inTime = new Date(checkIn.replace(' ', 'T'));
-      const outTime = new Date(checkOut.replace(' ', 'T'));
-      workingMinutes = Math.floor((outTime - inTime) / 60000);
+      const calcResult = calculateAttendanceDuration(checkIn, checkOut);
+      workingMinutes = calcResult.workingMinutes;
+      correctedCheckOut = calcResult.correctedCheckOut;
       status = 'Completed';
     } else if (checkIn) {
       status = 'Working';
@@ -168,14 +171,14 @@ exports.approveRequest = async (req, res) => {
         SET check_in_time = $1, check_out_time = $2, working_minutes = $3, status = $4, updated_at = CURRENT_TIMESTAMP
         WHERE attendance_id = $5
       `;
-      await pool.query(upQuery, [checkIn, checkOut, workingMinutes, status, attId]);
+      await pool.query(upQuery, [checkIn, correctedCheckOut, workingMinutes, status, attId]);
     } else {
       // Insert
       const inQuery = `
         INSERT INTO attendance (employee_id, attendance_date, check_in_time, check_out_time, working_minutes, status)
         VALUES ($1, $2, $3, $4, $5, $6)
       `;
-      await pool.query(inQuery, [request.employee_id, attDateStr, checkIn, checkOut, workingMinutes, status]);
+      await pool.query(inQuery, [request.employee_id, attDateStr, checkIn, correctedCheckOut, workingMinutes, status]);
     }
     
     // Mark as Approved

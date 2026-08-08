@@ -53,6 +53,26 @@ async function runMigrations() {
         `);
         console.log('✅ chat_messages table ensured.');
 
+        // Ensure leaves table exists
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS leaves (
+                leave_id SERIAL PRIMARY KEY,
+                employee_id INTEGER REFERENCES employees(employee_id) ON DELETE CASCADE,
+                leave_type VARCHAR(50) NOT NULL,
+                from_date DATE NOT NULL,
+                to_date DATE NOT NULL,
+                total_days NUMERIC(5,2) NOT NULL,
+                reason TEXT NOT NULL,
+                attachment TEXT,
+                status VARCHAR(50) DEFAULT 'Pending',
+                applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                approved_by INTEGER REFERENCES employees(employee_id) ON DELETE SET NULL,
+                approved_at TIMESTAMP,
+                rejection_reason TEXT
+            );
+        `);
+        console.log('✅ leaves table ensured.');
+
         // Seed roles if table is empty
         const rolesCount = await pool.query('SELECT COUNT(*) FROM roles;');
         if (parseInt(rolesCount.rows[0].count) === 0) {

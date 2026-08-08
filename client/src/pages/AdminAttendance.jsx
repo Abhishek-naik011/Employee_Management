@@ -257,12 +257,14 @@ const AdminAttendance = () => {
     if (!activeCard) return data;
     switch (activeCard) {
       case 'total':
-        return data; // all records for today (already filtered by date)
+        return data; 
       case 'present':
-        return data; // same as total for today
+        // Present means they have an attendance record (not Absent).
+        // Using strict status check instead of attendance_id to ensure safety.
+        return data.filter(rec => rec.status && rec.status !== 'Absent');
       case 'absent':
-        // No attendance records for absent employees; return empty array
-        return [];
+        // Absent means they don't have an attendance record for today.
+        return data.filter(rec => rec.status === 'Absent');
       case 'working':
         return data.filter(rec => rec.status === 'Working');
       case 'forgot':
@@ -430,7 +432,7 @@ const AdminAttendance = () => {
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor}`}>{record.status}</span>
                       </td>
                       <td className="p-4 text-sm text-gray-500">
-                        {record.regularization_approved_by || '-'}
+                        {record.regularization_approved_by_name || '-'}
                       </td>
                       <td className="p-4 text-sm text-gray-500">
                         {record.regularization_approved_on ? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).format(new Date(record.regularization_approved_on)) : '-'}

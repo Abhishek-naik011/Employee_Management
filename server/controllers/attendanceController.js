@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { calculateAttendanceDuration } = require('../utils/attendanceHelper');
 
 exports.checkIn = async (req, res) => {
     try {
@@ -85,25 +86,41 @@ exports.getAll = async (req, res) => {
         const { dateFilter, employeeId, departmentId, status } = req.query;
         
         let query = `
-            SELECT a.*, e.full_name, d.department_name,
+            SELECT a.*, e.full_name, e.employee_id AS emp_id, d.department_name,
                    ar.approved_by AS regularization_approved_by,
+                   approver_emp.full_name AS regularization_approved_by_name,
                    ar.approved_at AS regularization_approved_on
-            FROM attendance a
-            JOIN employees e ON a.employee_id = e.employee_id
-            LEFT JOIN departments d ON e.department_id = d.department_id
+        `;
+        
+        if (dateFilter === 'Today') {
+            query += `
+                FROM employees e
+                LEFT JOIN attendance a ON a.employee_id = e.employee_id AND a.attendance_date = CURRENT_DATE
+                LEFT JOIN departments d ON e.department_id = d.department_id
+            `;
+        } else {
+            query += `
+                FROM attendance a
+                JOIN employees e ON a.employee_id = e.employee_id
+                LEFT JOIN departments d ON e.department_id = d.department_id
+            `;
+        }
+        
+        query += `
             LEFT JOIN (
                 SELECT attendance_id, MAX(approved_by) as approved_by, MAX(approved_at) as approved_at
                 FROM attendance_regularizations
                 WHERE status = 'Approved'
                 GROUP BY attendance_id
             ) ar ON a.attendance_id = ar.attendance_id
+            LEFT JOIN employees approver_emp ON ar.approved_by = approver_emp.employee_id
             WHERE 1=1
         `;
         const params = [];
         let paramIndex = 1;
         
         if (dateFilter === 'Today') {
-            query += ` AND a.attendance_date = CURRENT_DATE`;
+            query += ` AND e.status = 'Active'`;
         } else if (dateFilter === 'This Week') {
             query += ` AND a.attendance_date >= date_trunc('week', CURRENT_DATE)`;
         } else if (dateFilter === 'This Month') {
@@ -111,7 +128,7 @@ exports.getAll = async (req, res) => {
         }
         
         if (employeeId) {
-            query += ` AND a.employee_id = $${paramIndex++}`;
+            query += ` AND e.employee_id = $${paramIndex++}`;
             params.push(employeeId);
         }
         
@@ -121,21 +138,43 @@ exports.getAll = async (req, res) => {
         }
         
         if (status) {
-            query += ` AND a.status = $${paramIndex++}`;
-            params.push(status);
+            if (status === 'Absent' && dateFilter === 'Today') {
+                query += ` AND a.attendance_id IS NULL`;
+            } else {
+                query += ` AND a.status = $${paramIndex++}`;
+                params.push(status);
+            }
         }
         
-        query += ` ORDER BY a.attendance_date DESC, a.check_in_time DESC`;
+        if (dateFilter === 'Today') {
+            query += ` ORDER BY a.check_in_time DESC NULLS LAST, e.full_name ASC`;
+        } else {
+            query += ` ORDER BY a.attendance_date DESC, a.check_in_time DESC`;
+        }
         
         const result = await pool.query(query, params);
         
-        // Dynamic "Forgot Checkout" check for past dates
+        // Dynamic "Forgot Checkout" check for past dates and handling Absent mock data
         const mappedRows = result.rows.map(row => {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const rowDateStr = new Date(row.attendance_date).toISOString().split('T')[0];
-            
-            if (row.check_out_time === null && rowDateStr < todayStr) {
-                row.status = 'Forgot Checkout';
+            if (!row.employee_id) {
+                row.employee_id = row.emp_id;
+            }
+            if (!row.attendance_id) {
+                // Mock properties for frontend so it doesn't crash
+                row.status = 'Absent';
+                row.attendance_date = new Date().toISOString();
+                row.check_in_time = null;
+                row.check_out_time = null;
+                row.working_minutes = null;
+            } else {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const rowDate = new Date(row.attendance_date);
+                rowDate.setHours(0, 0, 0, 0);
+                
+                if (row.check_out_time === null && rowDate < today) {
+                    row.status = 'Forgot Checkout';
+                }
             }
             return row;
         });
@@ -152,18 +191,35 @@ exports.editAttendance = async (req, res) => {
         const { id } = req.params;
         const { check_in_time, check_out_time } = req.body;
         
+        // Fetch current record to get previous_working_minutes
+        const currentRecRes = await pool.query('SELECT previous_working_minutes FROM attendance WHERE attendance_id = $1', [id]);
+        if (currentRecRes.rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Attendance record not found.' });
+        }
+        
+        const previousMinutes = currentRecRes.rows[0].previous_working_minutes || 0;
+        
+        let workingMinutes = 0;
+        let correctedCheckOut = check_out_time;
+
+        if (check_in_time && check_out_time) {
+            const calc = calculateAttendanceDuration(check_in_time, check_out_time, previousMinutes);
+            workingMinutes = calc.workingMinutes;
+            correctedCheckOut = calc.correctedCheckOut;
+        }
+
         let updateQuery = `
             UPDATE attendance 
             SET 
                 check_in_time = $1,
                 check_out_time = $2,
-                working_minutes = CASE WHEN $2 IS NOT NULL THEN COALESCE(previous_working_minutes, 0) + (EXTRACT(EPOCH FROM ($2::timestamp - COALESCE(resume_start_time, $1::timestamp))) / 60) ELSE working_minutes END,
+                working_minutes = $3,
                 updated_at = CURRENT_TIMESTAMP
-            WHERE attendance_id = $3
+            WHERE attendance_id = $4
             RETURNING *
         `;
         
-        const result = await pool.query(updateQuery, [check_in_time, check_out_time, id]);
+        const result = await pool.query(updateQuery, [check_in_time, correctedCheckOut, workingMinutes, id]);
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: 'Attendance record not found.' });
         }
