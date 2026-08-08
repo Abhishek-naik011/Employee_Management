@@ -20,7 +20,7 @@ exports.login = async (req, res) => {
 
         console.log(`\n--- LOGIN DEBUG ---`);
         console.log(`Email received: ${email}`);
-        
+
         const query = `
             SELECT
                 e.employee_id,
@@ -39,7 +39,7 @@ exports.login = async (req, res) => {
             WHERE e.email = $1
         `;
         const result = await pool.query(query, [email]);
-        
+
         console.log(`User found in database: ${result.rows.length > 0}`);
 
         if (result.rows.length === 0) {
@@ -64,7 +64,7 @@ exports.login = async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, employee.password_hash);
         console.log(`bcrypt.compare() result: ${isMatch}`);
-        
+
         if (!isMatch) {
             console.log(`Response returned: Invalid credentials (wrong password)`);
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
@@ -86,9 +86,9 @@ exports.login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { 
-                id: employee.employee_id, 
-                role_id: employee.role_id, 
+            {
+                id: employee.employee_id,
+                role_id: employee.role_id,
                 role_name: employee.role_name,
                 permissions: permissions,
                 email: employee.email
@@ -99,8 +99,8 @@ exports.login = async (req, res) => {
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true,
+            sameSite: 'none',
             maxAge: 12 * 60 * 60 * 1000 // 12 hours
         });
 
@@ -129,7 +129,7 @@ exports.login = async (req, res) => {
 exports.changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
-        
+
         // We use req.user injected by verifyToken (which in this case is the tempToken)
         if (!req.user || !req.user.id) {
             return res.status(401).json({ success: false, message: 'Invalid session.' });
@@ -153,7 +153,7 @@ exports.changePassword = async (req, res) => {
             WHERE e.employee_id = $1
         `;
         const result = await pool.query(query, [req.user.id]);
-        
+
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
@@ -215,9 +215,9 @@ exports.changePassword = async (req, res) => {
 
         // Issue new full token
         const token = jwt.sign(
-            { 
-                id: employee.employee_id, 
-                role_id: employee.role_id, 
+            {
+                id: employee.employee_id,
+                role_id: employee.role_id,
                 role_name: employee.role_name,
                 permissions: permissions,
                 email: employee.email
@@ -228,8 +228,8 @@ exports.changePassword = async (req, res) => {
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true,
+            sameSite: 'none',
             maxAge: 12 * 60 * 60 * 1000 // 12 hours
         });
 
@@ -327,8 +327,8 @@ exports.register = async (req, res) => {
 exports.logout = (req, res) => {
     res.clearCookie('token', {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+        secure: true,
+        sameSite: 'none'
     });
     res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
@@ -367,7 +367,7 @@ exports.getMe = async (req, res) => {
 
         let permissions = [];
         if (employee.role_name === 'Admin') {
-            permissions = []; 
+            permissions = [];
         } else {
             try {
                 permissions = employee.permissions ? JSON.parse(employee.permissions) : [];
