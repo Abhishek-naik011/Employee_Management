@@ -27,6 +27,11 @@ app.use(cors({
       return callback(null, true);
     }
 
+    // Allow any Vercel deployment URL for this project
+    if (origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
     // Check against the explicit whitelist
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
