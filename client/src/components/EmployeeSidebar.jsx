@@ -9,11 +9,12 @@ import {
   UserCircle,
   LogOut,
   CalendarDays,
+  X,
 } from 'lucide-react';
 import authFetch from '../utils/authFetch';
 import { usePermission } from '../context/PermissionContext';
 
-const EmployeeSidebar = () => {
+const EmployeeSidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { permissions, isAdmin } = usePermission();
 
@@ -45,40 +46,55 @@ const EmployeeSidebar = () => {
   };
 
   return (
-    <div className="flex flex-col h-full w-64 bg-white/80 backdrop-blur-xl border-r border-gray-200 shadow-sm transition-all duration-300">
-      <div className="flex items-center justify-center h-20 border-b border-gray-100">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-          EmpManage
-        </h1>
-      </div>
-      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        {menuItems.filter(canShow).map((item) => (
-          <NavLink
-            key={item.name}
-            to={item.path}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      <div
+        className={`fixed md:static top-0 left-0 h-full md:h-screen w-64 bg-white/80 backdrop-blur-xl border-r border-gray-200 shadow-sm z-50 flex flex-col transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          } md:translate-x-0`}
+      >
+        <div className="flex items-center justify-between md:justify-center h-20 border-b border-gray-100 px-4">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            EmpManage
+          </h1>
+          <button onClick={onClose} className="md:hidden text-gray-500">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+          {menuItems.filter(canShow).map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.path}
+              onClick={onClose}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
                   ? 'bg-blue-50 text-blue-600 font-medium shadow-sm'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }`
-            }
+                }`
+              }
+            >
+              <item.icon className="w-5 h-5" />
+              <span>{item.name}</span>
+            </NavLink>
+          ))}
+        </nav>
+        <div className="p-4 border-t border-gray-100">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-600 hover:bg-red-50 transition-colors duration-200"
           >
-            <item.icon className="w-5 h-5" />
-            <span>{item.name}</span>
-          </NavLink>
-        ))}
-      </nav>
-      <div className="p-4 border-t border-gray-100">
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-600 hover:bg-red-50 transition-colors duration-200"
-        >
-          <LogOut className="w-5 h-5" />
-          <span className="font-medium">Logout</span>
-        </button>
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Logout</span>
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
