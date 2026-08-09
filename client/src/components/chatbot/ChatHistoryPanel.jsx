@@ -3,26 +3,25 @@ import { Search, Edit2, Trash2, MessageSquare, X, Clock, CalendarDays } from 'lu
 import { useChatbot } from '../../context/ChatbotContext';
 
 const ChatHistoryPanel = () => {
-  const { 
-    historyIsOpen, 
-    toggleHistory, 
+  const {
+    historyIsOpen,
+    toggleHistory,
     setHistoryIsOpen,
-    conversations, 
-    currentConversationId, 
-    loadConversation, 
-    startNewConversation, 
-    renameConversation, 
-    deleteConversation 
+    conversations,
+    currentConversationId,
+    loadConversation,
+    startNewConversation,
+    renameConversation,
+    deleteConversation
   } = useChatbot();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
 
-  // Group conversations by Today, Yesterday, etc.
   const groupedConversations = useMemo(() => {
     if (!conversations) return {};
-    
+
     let filtered = conversations;
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
@@ -60,7 +59,7 @@ const ChatHistoryPanel = () => {
   if (!historyIsOpen) return null;
 
   return (
-    <div className="absolute top-0 right-full h-full w-[300px] bg-white border-l border-gray-100 shadow-xl z-50 flex flex-col transition-transform">
+    <div className="fixed md:absolute top-0 left-0 md:left-auto md:right-full h-full w-full md:w-[300px] bg-white md:border-l border-gray-100 shadow-xl z-[60] flex flex-col transition-transform">
       {/* Header */}
       <div className="px-4 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
         <h3 className="font-bold text-gray-800 flex items-center gap-2">
@@ -112,15 +111,14 @@ const ChatHistoryPanel = () => {
                   const timeString = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                   return (
-                    <div 
-                      key={conv.id} 
-                      className={`group relative flex items-center gap-3 p-3 mx-2 my-1 rounded-xl cursor-pointer transition-all ${
-                        isActive ? 'bg-blue-50 border border-blue-100' : 'hover:bg-gray-50 border border-transparent'
-                      }`}
+                    <div
+                      key={conv.id}
+                      className={`group relative flex items-center gap-3 p-3 mx-2 my-1 rounded-xl cursor-pointer transition-all ${isActive ? 'bg-blue-50 border border-blue-100' : 'hover:bg-gray-50 border border-transparent'
+                        }`}
                       onClick={() => !editingId && loadConversation(conv.id)}
                     >
                       <MessageSquare className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-blue-500' : 'text-gray-400'}`} />
-                      
+
                       <div className="flex-1 min-w-0">
                         {editingId === conv.id ? (
                           <input
@@ -145,14 +143,14 @@ const ChatHistoryPanel = () => {
 
                       {/* Actions */}
                       <div className={`flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'opacity-100' : ''}`}>
-                        <button 
+                        <button
                           onClick={(e) => { e.stopPropagation(); handleRename(conv.id, conv.title); }}
                           className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-white rounded-lg transition-colors"
                           title="Rename"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        <button 
+                        <button
                           onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}
                           className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-white rounded-lg transition-colors"
                           title="Delete"
