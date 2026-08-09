@@ -216,7 +216,7 @@ const EmployeeDashboard = () => {
         {/* Profile Card */}
         <div className="mt-6">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-6">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
                 {employee.full_name?.charAt(0)?.toUpperCase()}
               </div>
@@ -224,7 +224,7 @@ const EmployeeDashboard = () => {
                 <h1 className="text-2xl font-bold text-white">{employee.full_name}</h1>
                 <p className="text-blue-100 text-sm mt-0.5">EMP{String(employee.employee_id).padStart(3, '0')}</p>
               </div>
-              <div className="ml-auto flex items-center gap-4">
+              <div className="sm:ml-auto flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
                 <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${employee.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
                   {employee.status}
                 </span>
@@ -413,18 +413,18 @@ const EmployeeDashboard = () => {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Check Out</h3>
             <p className="text-sm text-gray-500 mb-6">
-              Are you sure you want to check out for today?<br/>
+              Are you sure you want to check out for today?<br />
               You will not be able to continue working unless an administrator resumes your attendance.
             </p>
             <div className="flex justify-center gap-3">
-              <button 
-                onClick={() => setShowCheckoutConfirm(false)} 
+              <button
+                onClick={() => setShowCheckoutConfirm(false)}
                 className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
-              <button 
-                onClick={handleCheckOut} 
+              <button
+                onClick={handleCheckOut}
                 className="flex-1 px-4 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-sm"
               >
                 Yes, Check Out
